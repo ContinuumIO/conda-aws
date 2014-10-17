@@ -114,9 +114,13 @@ def create_server_conf_file(private_ip):
 		print ioe
 		sys.exit(-1)
 
-def main(region,vpc_snet,subnet_arg,avzone_arg,ssh_key):
+def main(region,vpc_snet,subnet_arg,avzone_arg,ssh_key,num_slaves,hdfs_config):
 	if vpc_snet.startswith("10.8"):
 		print "Subnet 10.8.x.x is reserved for the VPN client network. Use any other private space subnet please."
+		sys.exit()
+
+	if hdfs_config and num_slaves < 2:
+		print "More than 3 machines needed in cluster configuration for HDFS"
 		sys.exit()
 
 	private_ip,public_ip = create_vpc(region,vpc_snet,subnet_arg,avzone_arg)
@@ -167,3 +171,10 @@ def main(region,vpc_snet,subnet_arg,avzone_arg,ssh_key):
 	print 'Your subnet is %s, your OpenVPN server on the subnet is %s (this is the same host with the public IP: %s)' % (subnet_arg,private_ip,public_ip)
 	print 'When you connect to the OpenVPN, your personal machine will be on the 10.8.0.0/24 subnet and its IP is assigned automatically.'
 	print 'All your spark nodes will be on the same %s subnet, starting with master at subnet IP 100, slaves start at 101. Enjoy!' % subnet_arg
+
+	print
+	print 'Launching Spark machines in cluster.'
+	ami_to_use = default_conda_ami
+	
+	if hdfs_config:
+		ami_to_use = ### ENTER AMI HERE
